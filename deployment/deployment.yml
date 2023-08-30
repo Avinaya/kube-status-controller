@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: status-controller
+  namespace: status-controller
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: status-controller
+  template:
+    metadata:
+      labels:
+        app: status-controller
+    spec:
+      containers:
+        - name: status-controller
+          image: avinaya123/status-controller:latest
+          imagePullPolicy: Always
+          env:
+            - name: API_URL
+              value: "https://zerone-4472-9110.avinayaacharya.com.np"

@@ -209,7 +209,7 @@ func main() {
 }
 
 func patchClusterStatus(name, id, status string) error {
-	url := os.Getenv("API_URL")
+	url := os.Getenv("API_URL") + "/v1/public/cluster-status"
 	if url == "" {
 		logrus.Error("base url is not set")
 		return errors.New("base url is not set")
