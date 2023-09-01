@@ -77,7 +77,35 @@ func (c *Controller) syncToStdout(key string) error {
 		if pod.Labels["status-controller-vcluster"] == "cluster-manager" {
 			for key, value := range pod.ObjectMeta.Labels {
 				if key == "status-controller" {
-					patchClusterStatus(pod.Name, value, string(pod.Status.Phase))
+					// Extract the specific container status
+					statusString := ""
+					for _, containerStatus := range pod.Status.ContainerStatuses {
+						containerState := containerStatus.State
+
+						if containerState.Waiting != nil {
+							waitingReason := containerState.Waiting.Reason
+							switch waitingReason {
+							case "ImagePullBackOff":
+								statusString = "ImagePullBackOff"
+							case "OOMKilled":
+								statusString = "OOMKilled"
+							case "ContainerConfigError":
+								statusString = "ContainerConfigError"
+							case "CrashLoopBackOff":
+								statusString = "CrashLoopBackOff"
+							default:
+								statusString = "Pending"
+							}
+						} else if containerState.Running != nil {
+							statusString = "Running"
+						} else if containerState.Terminated != nil {
+							statusString = "Stopped"
+						} else {
+							statusString = "Failed"
+						}
+					}
+					fmt.Printf("Container %s Status: %s\n", pod.Name, statusString)
+					patchClusterStatus(pod.Name, value, statusString)
 				}
 			}
 		}
