@@ -86,13 +86,11 @@ func (c *Controller) syncToStdout(key string) error {
 							waitingReason := containerState.Waiting.Reason
 							switch waitingReason {
 							case "ImagePullBackOff":
-								statusString = "ImagePullBackOff"
 							case "OOMKilled":
-								statusString = "OOMKilled"
 							case "ContainerConfigError":
-								statusString = "ContainerConfigError"
 							case "CrashLoopBackOff":
-								statusString = "CrashLoopBackOff"
+								statusString = waitingReason
+								break
 							default:
 								statusString = "Pending"
 							}
@@ -237,7 +235,7 @@ func main() {
 }
 
 func patchClusterStatus(name, id, status string) error {
-	url := os.Getenv("API_URL") + "/v1/public/cluster-status"
+	url := os.Getenv("API_URL") + "/v1/public/cluster-status?token=" + os.Getenv("API_TOKEN")
 	if url == "" {
 		logrus.Error("base url is not set")
 		return errors.New("base url is not set")
